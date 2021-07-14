@@ -24,6 +24,26 @@ include("setup.jl")
         @test isfile(path)
         @test value == read(path, String)
         rm(path)
+
+        @testset "Download with auto extension" begin
+            url_CD = "$server/response-headers?Content-Disposition="
+            path = download("$(url_CD)filename%3DJulia.jpg")
+            @test isfile(path)
+            @test endswith(path, ".jpg")
+            rm(path)
+            path = download("$(url_CD)filename*%3DJulia.jpg")
+            @test isfile(path)
+            @test endswith(path, ".jpg")
+            rm(path)
+            path = download("$server/robots.txt")
+            @test isfile(path)
+            @test endswith(path, ".txt")
+            rm(path)
+            path = download(server)
+            # response.url protects against adding domain as extension
+            @test !endswith(path, "org")
+            rm(path)
+        end
         # test with two arguments
         arg_writers() do path, output
             @arg_test output begin
